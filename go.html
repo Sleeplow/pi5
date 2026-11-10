@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="referrer" content="no-referrer">
+<title>Ouverture…</title>
+<style>body{font:16px system-ui;background:#0b0f17;color:#9aa6ba;display:grid;place-items:center;height:100vh;margin:0}a{color:#6cb4ff}</style>
+</head>
+<body>
+<p id="m">Ouverture…</p>
+<script>
+// Relais du tableau de bord du homelab : l'app iPhone ne peut envoyer à Safari que des adresses HTTPS
+// (x-safari-https://). Elle ouvre donc cette page avec la vraie adresse après le « # » (jamais envoyée au serveur),
+// et la page y redirige. Seules les adresses du réseau privé sont acceptées (pas de redirection ouverte).
+(function () {
+  var m = document.getElementById('m');
+  try {
+    var u = new URL(decodeURIComponent(location.hash.slice(1)));
+    var h = u.hostname, p = h.split('.').map(Number);
+    var prive = p.length === 4 && p.every(function (n) { return n >= 0 && n <= 255; }) &&
+      ((p[0] === 192 && p[1] === 168) || (p[0] === 10) || (p[0] === 100 && p[1] >= 64 && p[1] <= 127));
+    if ((u.protocol === 'http:' || u.protocol === 'https:') && prive && !u.username && !u.password) {
+      location.replace(u.href);
+      return;
+    }
+  } catch (e) {}
+  m.textContent = 'Adresse refusée.';
+})();
+</script>
+</body>
+</html>
